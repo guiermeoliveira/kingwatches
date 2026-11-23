@@ -3,7 +3,8 @@ import "./assets/styles/style.css";
 import { api } from "./services/api";
 
 export default function App() {
-  const [pagina, setPagina] = useState("inicio");
+  const [secaoAtiva, setSecaoAtiva] = useState("inicio");
+  const [menuMobileAberto, setMenuMobileAberto] = useState(false);
 
   // Modais
   const [modalAuthAberto, setModalAuthAberto] = useState(false);
@@ -49,6 +50,15 @@ export default function App() {
     carregarCatalogo();
   }, []);
 
+  const navegarPara = (idSecao) => {
+    setSecaoAtiva(idSecao);
+    setMenuMobileAberto(false);
+    const el = document.getElementById(idSecao);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const formatarBRL = (valor) =>
     Number(valor || 0).toLocaleString("pt-BR", {
       style: "currency",
@@ -77,7 +87,7 @@ export default function App() {
           email: authForm.email,
           novaSenha: authForm.novaSenha,
         });
-        setAuthFeedback("Senha atualizada com sucesso. Entre com a nova senha.");
+        setAuthFeedback("Senha atualizada com sucesso. Entre com a nova credencial.");
         setAbaAuth("login");
         setAuthForm((prev) => ({ ...prev, senha: "", novaSenha: "" }));
         return;
@@ -108,6 +118,7 @@ export default function App() {
       await api.excluirConta(usuario.id);
       setUsuario(null);
       setSacola([]);
+      setMenuMobileAberto(false);
       alert("Conta removida do sistema.");
     } catch (err) {
       alert(err.message);
@@ -125,8 +136,8 @@ export default function App() {
         assunto: "Aquisição de Peça",
         mensagem: "",
       });
-    } catch (err) {
-      setStatusEnvio("Erro ao enviar mensagem. Verifique se o backend Spring está rodando.");
+    } catch {
+      setStatusEnvio("Erro ao enviar mensagem. Verifique a conexão com o servidor.");
     }
   };
 
@@ -139,7 +150,7 @@ export default function App() {
       alert("Aquisição concluída e estoque atualizado!");
       setSacola([]);
       setDrawerAberto(false);
-      carregarCatalogo(); // Atualiza estoque na tela
+      carregarCatalogo();
     } catch (err) {
       alert(err.message);
     }
@@ -154,22 +165,22 @@ export default function App() {
 
   return (
     <>
-      {/* HEADER */}
+      {/* HEADER RESPONSIVO */}
       <header className="site-header">
         <div className="container nav">
           <a
             href="#inicio"
             className="brand-logo"
-            style={{ flexDirection: "row", alignItems: "center", gap: "0.85rem" }}
+            style={{ flexDirection: "row", alignItems: "center", gap: "0.75rem" }}
             onClick={(e) => {
               e.preventDefault();
-              setPagina("inicio");
+              navegarPara("inicio");
             }}
           >
             <img
               src="/logo-kingwatches.png"
               alt="KingWatches"
-              style={{ width: "42px", height: "42px", objectFit: "contain" }}
+              style={{ width: "38px", height: "38px", objectFit: "contain" }}
             />
             <div>
               <strong>KING WATCHES</strong>
@@ -187,10 +198,10 @@ export default function App() {
               <a
                 key={item.id}
                 href={`#${item.id}`}
-                className={pagina === item.id ? "active" : ""}
+                className={secaoAtiva === item.id ? "active" : ""}
                 onClick={(e) => {
                   e.preventDefault();
-                  setPagina(item.id);
+                  navegarPara(item.id);
                 }}
               >
                 {item.label}
@@ -201,21 +212,23 @@ export default function App() {
           <div className="nav-actions">
             {usuario ? (
               <>
-                <button className="nav-icon-btn" onClick={() => setUsuario(null)}>
+                <button
+                  className="nav-icon-btn desktop-only"
+                  onClick={() => setUsuario(null)}
+                >
                   {usuario.nome} (Sair)
                 </button>
                 <button
-                  className="nav-icon-btn"
+                  className="nav-icon-btn desktop-only"
                   style={{ color: "var(--slate-400)" }}
                   onClick={handleExcluirConta}
-                  title="Excluir minha conta"
                 >
                   Excluir Conta
                 </button>
               </>
             ) : (
               <button
-                className="nav-icon-btn"
+                className="nav-icon-btn desktop-only"
                 onClick={() => {
                   setDrawerAberto(false);
                   setAbaAuth("login");
@@ -231,339 +244,342 @@ export default function App() {
               className="nav-icon-btn"
               onClick={() => {
                 setModalAuthAberto(false);
+                setMenuMobileAberto(false);
                 setDrawerAberto(true);
               }}
             >
               Sacola <span className="bag-badge">{sacola.length}</span>
             </button>
+
+            <button
+              className="mobile-toggle"
+              aria-label="Abrir Menu"
+              onClick={() => setMenuMobileAberto((prev) => !prev)}
+            >
+              {menuMobileAberto ? "✕" : "☰"}
+            </button>
           </div>
         </div>
       </header>
 
-      {/* PÁGINAS */}
+      {/* MENU MOBILE DRAWER */}
+      {menuMobileAberto && (
+        <div className="mobile-drawer">
+          <div className="mobile-nav-list">
+            {[
+              { id: "inicio", label: "Início" },
+              { id: "sobre", label: "Sobre a Maison" },
+              { id: "produtos", label: "Produtos" },
+              { id: "contato", label: "Contato" },
+            ].map((item) => (
+              <button
+                key={item.id}
+                className={`mobile-nav-link ${secaoAtiva === item.id ? "active" : ""}`}
+                onClick={() => navegarPara(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            {usuario ? (
+              <>
+                <button
+                  className="btn btn-outline"
+                  onClick={() => {
+                    setUsuario(null);
+                    setMenuMobileAberto(false);
+                  }}
+                >
+                  Sair ({usuario.nome})
+                </button>
+                <button
+                  className="btn btn-outline"
+                  style={{ color: "var(--slate-400)" }}
+                  onClick={handleExcluirConta}
+                >
+                  Excluir Minha Conta
+                </button>
+              </>
+            ) : (
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setMenuMobileAberto(false);
+                  setAbaAuth("login");
+                  setModalAuthAberto(true);
+                }}
+              >
+                Entrar / Cadastrar
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* CONTEÚDO CONTÍNUO DA LANDING PAGE */}
       <main>
-        {/* 1. INÍCIO */}
-        {pagina === "inicio" && (
-          <>
-            <section className="hero-luxury">
-              <div className="hero-bg-media">
-                <img
-                  src="https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?auto=format&fit=crop&w=1800&q=80"
-                  alt="Calibre mecânico"
-                />
-              </div>
-              <div className="container">
-                <div className="hero-content anim-rise">
-                  <span className="eyebrow">Coleção Privée • Edições Numeradas</span>
-                  <h1>
-                    A arquitetura do tempo em sua forma mais <em>pura</em>.
-                  </h1>
-                  <p className="lede">
-                    Cada relógio KingWatches reúne calibres mecânicos ajustados à
-                    mão, caixas esculpidas em metais nobres e mostradores de
-                    equilíbrio atemporal.
-                  </p>
-                  <div className="hero-actions">
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => setPagina("produtos")}
-                    >
-                      Explorar Catálogo
-                    </button>
-                    <button
-                      className="btn btn-outline"
-                      onClick={() => setPagina("sobre")}
-                    >
-                      Conhecer o Atelier
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className="section section-watermark">
-              <div className="section-watermark-bg">
-                <img
-                  src="https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?auto=format&fit=crop&w=1800&q=80"
-                  alt="Engrenagens"
-                />
-              </div>
-              <div className="container feature-split">
-                <div className="feature-body">
-                  <span className="eyebrow">01 • Engenharia Mecânica</span>
-                  <h2>Precisão calibrada ao centésimo de milímetro.</h2>
-                  <p className="lede">
-                    Movimentos operando a 28.800 alternâncias por hora com pontes
-                    chanfradas manualmente e reserva de marcha estendida.
-                  </p>
-                  <div className="feature-specs">
-                    <div className="spec-item">
-                      <span>Frequência</span>
-                      <strong>4 Hz / 28.800 vph</strong>
-                    </div>
-                    <div className="spec-item">
-                      <span>Reserva de Marcha</span>
-                      <strong>Até 72 Horas</strong>
-                    </div>
-                  </div>
-                </div>
-                <div className="feature-media">
-                  <img
-                    src="https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?auto=format&fit=crop&w=1000&q=80"
-                    alt="Mostrador minimalista"
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="section section-cream">
-              <div className="container feature-split reverse">
-                <div className="feature-body">
-                  <span className="eyebrow">02 • Materiais Nobres</span>
-                  <h2>Cristal de safira abobadado e acabamento acetinado.</h2>
-                  <p className="lede">
-                    Cada caixa passa por mais de 40 etapas de polimento manual,
-                    alternando superfícies escovadas e biséis espelhados.
-                  </p>
-                  <div style={{ marginTop: "2rem" }}>
-                    <button
-                      className="btn btn-outline"
-                      onClick={() => setPagina("contato")}
-                    >
-                      Falar com o Concierge
-                    </button>
-                  </div>
-                </div>
-                <div className="feature-media">
-                  <img
-                    src="https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=1000&q=80"
-                    alt="Caixa do relógio"
-                  />
-                </div>
-              </div>
-            </section>
-          </>
-        )}
-
-        {/* 2. SOBRE */}
-        {pagina === "sobre" && (
-          <section className="section section-watermark">
-            <div className="section-watermark-bg">
-              <img
-                src="https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?auto=format&fit=crop&w=1800&q=80"
-                alt="Atelier"
-              />
-            </div>
-            <div className="container">
-              <div className="section-head">
-                <div>
-                  <span className="eyebrow">Nossa Herança</span>
-                  <h1 className="section-title">A Filosofia KingWatches</h1>
-                </div>
-              </div>
-              <div className="feature-split">
-                <div className="feature-body">
-                  <p className="lede" style={{ marginBottom: "1.5rem" }}>
-                    Nascida da obsessão pelo silêncio visual e pela mecânica
-                    honesta, a KingWatches projeta instrumentos de medição do
-                    tempo livres de excessos.
-                  </p>
-                  <p className="lede">
-                    Cada referência é produzida em lotes restritos, com número de
-                    série gravado e certificado individual de cronometria.
-                  </p>
-                </div>
-                <div className="feature-media">
-                  <img
-                    src="https://images.unsplash.com/photo-1548171915-e79a380a2a4b?auto=format&fit=crop&w=1000&q=80"
-                    alt="Relojoaria"
-                  />
-                </div>
+        {/* 1. HERO */}
+        <section id="inicio" className="hero-luxury">
+          <div className="hero-bg-media">
+            <img
+              src="https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?auto=format&fit=crop&w=1800&q=80"
+              alt="Calibre mecânico"
+            />
+          </div>
+          <div className="container">
+            <div className="hero-content anim-rise">
+              <span className="eyebrow">Coleção Privée • Edições Numeradas</span>
+              <h1>
+                A arquitetura do tempo em sua forma mais <em>pura</em>.
+              </h1>
+              <p className="lede">
+                Cada relógio KingWatches reúne calibres mecânicos ajustados à
+                mão, caixas esculpidas em metais nobres e mostradores de
+                equilíbrio atemporal.
+              </p>
+              <div className="hero-actions">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navegarPara("produtos")}
+                >
+                  Explorar Catálogo
+                </button>
+                <button
+                  className="btn btn-outline"
+                  onClick={() => navegarPara("sobre")}
+                >
+                  Conhecer o Atelier
+                </button>
               </div>
             </div>
-          </section>
-        )}
+          </div>
+        </section>
 
-        {/* 3. PRODUTOS */}
-        {pagina === "produtos" && (
-          <section className="section">
-            <div className="container">
-              <div className="section-head">
-                <div>
-                  <span className="eyebrow">Acervo & Disponibilidade</span>
-                  <h1 className="section-title">Coleção Atual</h1>
-                </div>
-                <p className="lede">
-                  Catálogo sincronizado com nosso estoque. Faça login para
-                  adquirir peças disponíveis.
-                </p>
-              </div>
-
-              <div className="filter-bar">
-                {["Todos", "Clássicos", "Complicações", "Ultra-Thin"].map(
-                  (cat) => (
-                    <button
-                      key={cat}
-                      className={`filter-pill ${
-                        categoriaAtiva === cat ? "active" : ""
-                      }`}
-                      onClick={() => setCategoriaAtiva(cat)}
-                    >
-                      {cat}
-                    </button>
-                  )
-                )}
-              </div>
-
-              {carregandoProdutos ? (
-                <p className="lede">Consultando acervo...</p>
-              ) : produtosFiltrados.length === 0 ? (
-                <div className="concierge-card text-center">
-                  <span className="eyebrow">Acervo em Atualização</span>
-                  <h3 style={{ marginBlock: "0.75rem" }}>
-                    Nenhuma peça cadastrada no estoque no momento.
-                  </h3>
-                  <p className="lede" style={{ marginInline: "auto" }}>
-                    Assim que os relógios forem inseridos no banco MySQL via API
-                    Spring, eles aparecerão automaticamente nesta vitrine.
-                  </p>
-                </div>
-              ) : (
-                <div className="watch-grid">
-                  {produtosFiltrados.map((item) => {
-                    const disponivel = item.estoque > 0;
-                    return (
-                      <article key={item.id} className="watch-card">
-                        <div className="watch-frame">
-                          <span
-                            className={`stock-tag ${
-                              disponivel ? "in-stock" : "sold-out"
-                            }`}
-                          >
-                            {disponivel
-                              ? `Em estoque (${item.estoque})`
-                              : "Esgotado"}
-                          </span>
-                          <img src={item.imagemUrl} alt={item.nome} />
-                        </div>
-                        <span className="watch-ref">REF. {item.referencia}</span>
-                        <h3 className="watch-name">{item.nome}</h3>
-                        <p className="watch-caliber">{item.descricao}</p>
-                        <div className="watch-footer">
-                          <div className="watch-price">
-                            <small>VALOR À VISTA</small>
-                            {formatarBRL(item.preco)}
-                          </div>
-                          <button
-                            className="btn btn-primary"
-                            disabled={!disponivel}
-                            onClick={() => handleAdicionarSacola(item)}
-                          >
-                            {disponivel ? "Adquirir" : "Indisponível"}
-                          </button>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* 4. CONTATO */}
-        {pagina === "contato" && (
-          <section className="section section-cream">
-            <div className="container contact-layout">
+        {/* 2. SOBRE A MAISON */}
+        <section id="sobre" className="section section-watermark">
+          <div className="section-watermark-bg">
+            <img
+              src="https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?auto=format&fit=crop&w=1800&q=80"
+              alt="Engrenagens"
+            />
+          </div>
+          <div className="container">
+            <div className="section-head">
               <div>
-                <span className="eyebrow">Concierge Privé</span>
-                <h1 className="section-title" style={{ marginBottom: "1rem" }}>
-                  Atendimento Personalizado
-                </h1>
-                <p className="lede">
-                  Envie sua mensagem para agendar atendimento privado ou tirar
-                  dúvidas sobre disponibilidade de peças.
-                </p>
-              </div>
-
-              <div className="concierge-card">
-                <form onSubmit={handleContatoSubmit}>
-                  <div className="form-group">
-                    <label className="form-label">Nome Completo</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      required
-                      value={contatoForm.nome}
-                      onChange={(e) =>
-                        setContatoForm({ ...contatoForm, nome: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">E-mail</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      required
-                      value={contatoForm.email}
-                      onChange={(e) =>
-                        setContatoForm({ ...contatoForm, email: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Assunto</label>
-                    <select
-                      className="form-control"
-                      value={contatoForm.assunto}
-                      onChange={(e) =>
-                        setContatoForm({
-                          ...contatoForm,
-                          assunto: e.target.value,
-                        })
-                      }
-                    >
-                      <option>Aquisição de Peça</option>
-                      <option>Disponibilidade em Estoque</option>
-                      <option>Manutenção & Revisão</option>
-                      <option>Atendimento Privado</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Mensagem</label>
-                    <textarea
-                      className="form-control"
-                      required
-                      value={contatoForm.mensagem}
-                      onChange={(e) =>
-                        setContatoForm({
-                          ...contatoForm,
-                          mensagem: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  {statusEnvio && (
-                    <p style={{ marginBottom: "1rem", fontSize: "0.88rem" }}>
-                      {statusEnvio}
-                    </p>
-                  )}
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    style={{ width: "100%" }}
-                  >
-                    Enviar Mensagem
-                  </button>
-                </form>
+                <span className="eyebrow">Sobre a Maison • Nossa Herança</span>
+                <h2 className="section-title">A Filosofia KingWatches</h2>
               </div>
             </div>
-          </section>
-        )}
+
+            <div className="feature-split">
+              <div className="feature-body">
+                <p className="lede" style={{ marginBottom: "1.25rem" }}>
+                  Nascida da obsessão pelo silêncio visual e pela mecânica
+                  honesta, a KingWatches projeta instrumentos de medição do
+                  tempo livres de excessos.
+                </p>
+                <p className="lede">
+                  Nossos movimentos operam a 28.800 alternâncias por hora com
+                  pontes chanfradas manualmente, número de série gravado e
+                  certificado individual de cronometria.
+                </p>
+                <div className="feature-specs">
+                  <div className="spec-item">
+                    <span>Frequência & Reserva</span>
+                    <strong>4 Hz • Até 72 Horas</strong>
+                  </div>
+                  <div className="spec-item">
+                    <span>Garantia & Estanqueidade</span>
+                    <strong>5 Anos • 10 ATM / 100m</strong>
+                  </div>
+                </div>
+              </div>
+              <div className="feature-media">
+                <img
+                  src="https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?auto=format&fit=crop&w=1000&q=80"
+                  alt="Mostrador minimalista KingWatches"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. PRODUTOS / VITRINE DE ESTOQUE */}
+        <section id="produtos" className="section section-cream">
+          <div className="container">
+            <div className="section-head">
+              <div>
+                <span className="eyebrow">Acervo & Disponibilidade</span>
+                <h2 className="section-title">Coleção Atual</h2>
+              </div>
+              <p className="lede">
+                Catálogo sincronizado com nosso estoque. Faça login para
+                reservar ou adquirir peças disponíveis.
+              </p>
+            </div>
+
+            <div className="filter-bar">
+              {["Todos", "Clássicos", "Complicações", "Ultra-Thin"].map((cat) => (
+                <button
+                  key={cat}
+                  className={`filter-pill ${categoriaAtiva === cat ? "active" : ""}`}
+                  onClick={() => setCategoriaAtiva(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {carregandoProdutos ? (
+              <p className="lede">Consultando acervo...</p>
+            ) : produtosFiltrados.length === 0 ? (
+              <div className="concierge-card text-center">
+                <span className="eyebrow">Acervo em Atualização</span>
+                <h3 style={{ marginBlock: "0.75rem" }}>
+                  Nenhuma peça disponível nesta categoria no momento.
+                </h3>
+                <p className="lede" style={{ marginInline: "auto" }}>
+                  Entre em contato com nosso Concierge para encomendas sob
+                  medida.
+                </p>
+              </div>
+            ) : (
+              <div className="watch-grid">
+                {produtosFiltrados.map((item) => {
+                  const disponivel = item.estoque > 0;
+                  return (
+                    <article key={item.id} className="watch-card">
+                      <div className="watch-frame">
+                        <span
+                          className={`stock-tag ${
+                            disponivel ? "in-stock" : "sold-out"
+                          }`}
+                        >
+                          {disponivel
+                            ? `Em estoque (${item.estoque})`
+                            : "Esgotado"}
+                        </span>
+                        <img src={item.imagemUrl} alt={item.nome} />
+                      </div>
+                      <span className="watch-ref">REF. {item.referencia}</span>
+                      <h3 className="watch-name">{item.nome}</h3>
+                      <p className="watch-caliber">{item.descricao}</p>
+                      <div className="watch-footer">
+                        <div className="watch-price">
+                          <small>VALOR À VISTA</small>
+                          {formatarBRL(item.preco)}
+                        </div>
+                        <button
+                          className="btn btn-primary"
+                          disabled={!disponivel}
+                          onClick={() => handleAdicionarSacola(item)}
+                        >
+                          {disponivel ? "Adquirir" : "Indisponível"}
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* 4. CONTATO / CONCIERGE */}
+        <section id="contato" className="section">
+          <div className="container contact-layout">
+            <div>
+              <span className="eyebrow">Concierge Privé</span>
+              <h2 className="section-title" style={{ marginBottom: "1rem" }}>
+                Atendimento Personalizado
+              </h2>
+              <p className="lede" style={{ marginBottom: "2rem" }}>
+                Envie sua mensagem para agendar atendimento privado ou tirar
+                dúvidas sobre disponibilidade de peças.
+              </p>
+              <div className="spec-item" style={{ marginBottom: "1.2rem" }}>
+                <span>Boutique & Showroom</span>
+                <strong>Av. Europa, Jardins — São Paulo, SP</strong>
+              </div>
+              <div className="spec-item">
+                <span>Horário de Atendimento</span>
+                <strong>Segunda a Sábado, das 10h às 19h</strong>
+              </div>
+            </div>
+
+            <div className="concierge-card">
+              <form onSubmit={handleContatoSubmit}>
+                <div className="form-group">
+                  <label className="form-label">Nome Completo</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    required
+                    value={contatoForm.nome}
+                    onChange={(e) =>
+                      setContatoForm({ ...contatoForm, nome: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">E-mail</label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    required
+                    value={contatoForm.email}
+                    onChange={(e) =>
+                      setContatoForm({ ...contatoForm, email: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Assunto</label>
+                  <select
+                    className="form-control"
+                    value={contatoForm.assunto}
+                    onChange={(e) =>
+                      setContatoForm({ ...contatoForm, assunto: e.target.value })
+                    }
+                  >
+                    <option>Aquisição de Peça</option>
+                    <option>Disponibilidade em Estoque</option>
+                    <option>Manutenção & Revisão</option>
+                    <option>Atendimento Privado</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Mensagem</label>
+                  <textarea
+                    className="form-control"
+                    required
+                    value={contatoForm.mensagem}
+                    onChange={(e) =>
+                      setContatoForm({ ...contatoForm, mensagem: e.target.value })
+                    }
+                  />
+                </div>
+                {statusEnvio && (
+                  <p style={{ marginBottom: "1rem", fontSize: "0.88rem" }}>
+                    {statusEnvio}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ width: "100%" }}
+                >
+                  Enviar Mensagem
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
       </main>
 
-      {/* MODAL LOGIN / CADASTRO / ESQUECI MINHA SENHA */}
+      {/* MODAL LOGIN / CADASTRO / REDEFINIR SENHA */}
       {modalAuthAberto && (
         <div
           className="modal-backdrop"
@@ -844,3 +860,4 @@ export default function App() {
     </>
   );
 }
+

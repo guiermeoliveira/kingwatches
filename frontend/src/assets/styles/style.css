@@ -1028,13 +1028,47 @@ textarea.form-control {
 }
 
 /* ---------------------------------------------------------------------
-13. RESPONSIVIDADE
+13. RESPONSIVIDADE & MENU MOBILE
    --------------------------------------------------------------------- */
-@media (max-width: 960px) {
+.mobile-drawer {
+  position: fixed;
+  inset: 82px 0 0 0;
+  z-index: 150;
+  background-color: var(--bg-canvas);
+  border-top: 1px solid var(--border-hairline);
+  padding: 2rem clamp(1.5rem, 4vw, 3.5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  animation: fadeRise 0.35s var(--ease-luxury) both;
+}
+
+.mobile-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.mobile-nav-link {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--charcoal-950);
+  text-align: left;
+  padding-block: 0.35rem;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.mobile-nav-link.active {
+  color: var(--champagne);
+  font-style: italic;
+}
+
+@media (max-width: 1024px) {
   .feature-split,
   .watch-detail-grid,
   .contact-layout {
     grid-template-columns: 1fr;
+    gap: 2.5rem;
   }
 
   .feature-split.reverse .feature-media {
@@ -1046,22 +1080,81 @@ textarea.form-control {
   }
 }
 
-@media (max-width: 760px) {
-  .nav-links {
-    display: none;
+@media (max-width: 860px) {
+  .nav {
+    height: 72px;
+    gap: 0.75rem;
+  }
+
+  .brand-logo strong {
+    font-size: 1.15rem;
+    letter-spacing: 0.12em;
+  }
+
+  .brand-logo span {
+    font-size: 0.52rem;
+    letter-spacing: 0.2em;
+  }
+
+  .nav-links,
+  .desktop-only {
+    display: none !important;
   }
 
   .mobile-toggle {
     display: inline-flex;
-    font-size: 1.4rem;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    font-size: 1.35rem;
     color: var(--charcoal-950);
   }
 
+  .mobile-drawer {
+    inset: 72px 0 0 0;
+  }
+
+  .hero-luxury {
+    min-height: auto;
+    padding-block: 3.5rem;
+  }
+
   .hero-bg-media img {
-    opacity: 0.12;
+    opacity: 0.11;
+    object-position: center;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .feature-specs {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .watch-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-drawer {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+
+  .auth-modal {
+    padding: 1.75rem 1.35rem;
   }
 
   .footer-grid {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
+}
 }
