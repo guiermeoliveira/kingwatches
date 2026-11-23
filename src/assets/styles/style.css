@@ -1,0 +1,1067 @@
+/* =========================================================================
+   KING WATCHES — Alta Relojoaria & Atelier Privé
+   Arquitetura CSS3 Modular (React / Vite + Spring Boot API)
+   Estética: Quiet Luxury | Off-White, Creme Mineral, Cinza Ardósia & Champanhe
+   =========================================================================
+   Índice:
+   1.  Reset & Variáveis (Design Tokens)
+   2.  Tipografia Editorial & Hierarquia
+   3.  Utilitários, Botões & Micro-interações
+   4.  Header / Navegação Minimalista
+   5.  Hero Imersivo (Fundo Low-Contrast)
+   6.  Seções de Scroll & Storytelling (Características da Maison)
+   7.  Catálogo / Vitrine de Relógios (Estoque MySQL)
+   8.  Filtros de Coleção & Calibres
+   9.  Detalhes da Peça (Ficha Técnica & Especificações)
+   10. Concierge & Formulário de Contato
+   11. Autenticação (Login / Registro / Redefinir Senha) & Drawer de Compra
+   12. Footer Institucional
+   13. Responsividade
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------
+1. RESET & VARIÁVEIS (DESIGN TOKENS)
+   --------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Paleta Quiet Luxury — Off-White, Creme, Cinza Mineral & Ouro Champanhe */
+  --bg-canvas: #faf9f6;          /* Off-white alabastro principal */
+  --bg-cream: #f4f1ea;           /* Creme suave para blocos alternados */
+  --bg-stone: #eae6dd;           /* Bege acinzentado para superfícies sutis */
+  --surface-white: #ffffff;      /* Branco puro para cards e modais */
+  --surface-glass: rgba(250, 249, 246, 0.88);
+
+  /* Escala de Cinzas & Carvão */
+  --charcoal-950: #181817;       /* Títulos principais */
+  --charcoal-800: #2b2a28;       /* Texto corrido */
+  --slate-600: #595753;          /* Subtítulos e descrições */
+  --slate-400: #8c8982;          /* Metadados, legendas, placeholders */
+  --border-hairline: rgba(24, 24, 23, 0.09);
+  --border-medium: rgba(24, 24, 23, 0.18);
+
+  /* Acentos Metálicos (Ouro Champanhe & Aço Escovado) */
+  --champagne: #b3996c;
+  --champagne-light: #d4c3a3;
+  --champagne-muted: rgba(179, 153, 108, 0.16);
+  --steel-accent: #4a5259;
+
+  /* Tipografia */
+  --font-display: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-body: "Plus Jakarta Sans", "Inter", -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", monospace;
+
+  /* Espaçamento Fluido */
+  --space-xs: clamp(0.5rem, 0.4rem + 0.3vw, 0.75rem);
+  --space-sm: clamp(0.9rem, 0.75rem + 0.5vw, 1.35rem);
+  --space-md: clamp(1.75rem, 1.4rem + 1.2vw, 2.75rem);
+  --space-lg: clamp(3rem, 2.2rem + 3vw, 5.5rem);
+  --space-xl: clamp(5rem, 3.5rem + 5vw, 9rem);
+
+  /* Geometria arquitetônica */
+  --radius-none: 0px;
+  --radius-xs: 2px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+
+  /* Sombras difusas e etéreas */
+  --shadow-subtle: 0 8px 30px -12px rgba(24, 24, 23, 0.06);
+  --shadow-elevated: 0 24px 60px -15px rgba(24, 24, 23, 0.12);
+  --shadow-modal: 0 32px 80px -16px rgba(24, 24, 23, 0.22);
+
+  --ease-luxury: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 100%;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: block;
+  text-align: left;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--charcoal-800);
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* ---------------------------------------------------------------------
+2. TIPOGRAFIA EDITORIAL & HIERARQUIA
+   --------------------------------------------------------------------- */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  color: var(--charcoal-950);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75em;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--champagne);
+  font-weight: 500;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: var(--champagne);
+}
+
+.lede {
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  color: var(--slate-600);
+  max-width: 54ch;
+  font-weight: 300;
+}
+
+/* ---------------------------------------------------------------------
+3. UTILITÁRIOS, BOTÕES & MICRO-INTERAÇÕES
+   --------------------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: 1360px;
+  margin-inline: auto;
+  padding-inline: clamp(1.5rem, 4vw, 3.5rem);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75em;
+  padding: 0.95em 2.1em;
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  transition:
+    background-color 0.45s var(--ease-luxury),
+    color 0.45s var(--ease-luxury),
+    border-color 0.45s var(--ease-luxury),
+    transform 0.45s var(--ease-luxury);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background-color: var(--charcoal-950);
+  color: var(--bg-canvas);
+  border: 1px solid var(--charcoal-950);
+}
+
+.btn-primary:hover {
+  background-color: var(--champagne);
+  border-color: var(--champagne);
+  color: var(--charcoal-950);
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--charcoal-950);
+  border: 1px solid var(--border-medium);
+}
+
+.btn-outline:hover {
+  border-color: var(--charcoal-950);
+  background-color: var(--bg-cream);
+}
+
+.btn-champagne {
+  background-color: var(--champagne);
+  color: var(--charcoal-950);
+  border: 1px solid var(--champagne);
+}
+
+.btn-champagne:hover {
+  background-color: var(--charcoal-950);
+  border-color: var(--charcoal-950);
+  color: var(--bg-canvas);
+}
+
+@keyframes fadeRise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes subtleZoom {
+  from {
+    transform: scale(1.04);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.anim-rise {
+  animation: fadeRise 1s var(--ease-luxury) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------------
+4. HEADER / NAVEGAÇÃO MINIMALISTA
+   --------------------------------------------------------------------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 82px;
+  gap: var(--space-md);
+}
+
+.brand-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.brand-logo strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--charcoal-950);
+  white-space: nowrap;
+}
+
+.brand-logo span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--champagne);
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.5rem, 2.8vw, 3rem);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--slate-600);
+}
+
+.nav-links a {
+  position: relative;
+  padding-block: 0.4em;
+  white-space: nowrap;
+  transition: color 0.35s var(--ease-luxury);
+}
+
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 1px;
+  background-color: var(--champagne);
+  transition: width 0.4s var(--ease-luxury);
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--charcoal-950);
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+  width: 100%;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  flex-shrink: 0;
+}
+
+.nav-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--charcoal-950);
+  padding: 0.5rem 0.65rem;
+  white-space: nowrap;
+  transition: color 0.3s var(--ease-luxury);
+}
+
+.nav-icon-btn:hover {
+  color: var(--champagne);
+}
+
+.bag-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding-inline: 5px;
+  border-radius: 999px;
+  background-color: var(--champagne);
+  color: var(--charcoal-950);
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+.mobile-toggle {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------
+5. HERO IMERSIVO (FUNDO LOW-CONTRAST)
+   --------------------------------------------------------------------- */
+.hero-luxury {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 82px);
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-cream);
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.hero-bg-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-bg-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  opacity: 0.18;
+  filter: grayscale(40%) contrast(88%);
+  animation: subtleZoom 14s var(--ease-luxury) forwards;
+}
+
+.hero-bg-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    var(--bg-canvas) 0%,
+    rgba(250, 249, 246, 0.92) 45%,
+    rgba(244, 241, 234, 0.45) 100%
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+  padding-block: var(--space-xl);
+  text-align: left;
+}
+
+.hero-content h1 {
+  font-size: clamp(2.8rem, 2rem + 3.8vw, 5rem);
+  margin-block: 0.35em 0.4em;
+  font-weight: 400;
+}
+
+.hero-content h1 em {
+  font-style: italic;
+  color: var(--champagne);
+  font-weight: 400;
+}
+
+.hero-content .lede {
+  margin-bottom: var(--space-md);
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------------
+6. SEÇÕES DE SCROLL & STORYTELLING (CARACTERÍSTICAS DA MAISON)
+   --------------------------------------------------------------------- */
+.section {
+  position: relative;
+  width: 100%;
+  padding-block: var(--space-xl);
+}
+
+.section-cream {
+  background-color: var(--bg-cream);
+}
+
+.section-stone {
+  background-color: var(--bg-stone);
+}
+
+.section-watermark {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-canvas);
+}
+
+.section-watermark-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.section-watermark-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.11;
+  filter: grayscale(60%) contrast(85%);
+}
+
+.section-watermark-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(250, 249, 246, 0.65) 0%,
+    var(--bg-canvas) 85%
+  );
+}
+
+.section-watermark > .container {
+  position: relative;
+  z-index: 1;
+}
+
+.feature-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2.5rem, 6vw, 6rem);
+  align-items: center;
+}
+
+.feature-split.reverse .feature-media {
+  order: -1;
+}
+
+.feature-media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background-color: var(--bg-stone);
+  overflow: hidden;
+  border: 1px solid var(--border-hairline);
+}
+
+.feature-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.88;
+  transition: transform 1.2s var(--ease-luxury);
+}
+
+.feature-split:hover .feature-media img {
+  transform: scale(1.04);
+}
+
+.feature-body h2 {
+  font-size: clamp(2rem, 1.5rem + 2vw, 3.1rem);
+  margin-block: 0.35em 0.5em;
+}
+
+.feature-specs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-hairline);
+}
+
+.spec-item span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate-400);
+  margin-bottom: 0.25rem;
+}
+
+.spec-item strong {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--charcoal-950);
+}
+
+/* ---------------------------------------------------------------------
+7. CATÁLOGO / VITRINE DE RELÓGIOS (ESTOQUE MYSQL)
+   --------------------------------------------------------------------- */
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.5rem;
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.section-title {
+  font-size: clamp(2rem, 1.5rem + 2vw, 3rem);
+  margin-top: 0.3em;
+}
+
+.watch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.watch-card {
+  background-color: var(--surface-white);
+  border: 1px solid var(--border-hairline);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.55s var(--ease-luxury),
+    box-shadow 0.55s var(--ease-luxury),
+    border-color 0.55s var(--ease-luxury);
+}
+
+.watch-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-elevated);
+  border-color: var(--champagne-light);
+}
+
+.watch-frame {
+  position: relative;
+  aspect-ratio: 1 / 1.15;
+  background-color: var(--bg-cream);
+  margin-bottom: 1.4rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.watch-frame img {
+  width: 86%;
+  height: 86%;
+  object-fit: contain;
+  transition: transform 0.8s var(--ease-luxury);
+}
+
+.watch-card:hover .watch-frame img {
+  transform: scale(1.06);
+}
+
+.stock-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.35em 0.75em;
+  background-color: var(--surface-glass);
+  border: 1px solid var(--border-hairline);
+  color: var(--charcoal-800);
+}
+
+.stock-tag.in-stock {
+  border-color: var(--champagne);
+  color: var(--charcoal-950);
+}
+
+.stock-tag.sold-out {
+  opacity: 0.55;
+}
+
+.watch-ref {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--slate-400);
+  text-transform: uppercase;
+}
+
+.watch-name {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  color: var(--charcoal-950);
+  margin-block: 0.2rem 0.35rem;
+}
+
+.watch-caliber {
+  font-size: 0.85rem;
+  color: var(--slate-600);
+  margin-bottom: 1.2rem;
+}
+
+.watch-footer {
+  margin-top: auto;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--border-hairline);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.watch-price {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--charcoal-950);
+}
+
+.watch-price small {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 400;
+  color: var(--slate-400);
+}
+
+/* ---------------------------------------------------------------------
+8. FILTROS DE COLEÇÃO & CALIBRES
+   --------------------------------------------------------------------- */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.filter-pill {
+  padding: 0.65em 1.35em;
+  border: 1px solid var(--border-hairline);
+  background-color: var(--surface-white);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--slate-600);
+  transition: all 0.35s var(--ease-luxury);
+}
+
+.filter-pill:hover,
+.filter-pill.active {
+  background-color: var(--charcoal-950);
+  border-color: var(--charcoal-950);
+  color: var(--bg-canvas);
+}
+
+/* ---------------------------------------------------------------------
+9. DETALHES DA PEÇA (FICHA TÉCNICA)
+   --------------------------------------------------------------------- */
+.watch-detail-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+
+.watch-gallery-box {
+  background-color: var(--bg-cream);
+  border: 1px solid var(--border-hairline);
+  padding: clamp(2rem, 4vw, 4rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+}
+
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-block: var(--space-md);
+}
+
+.spec-table tr {
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.spec-table td {
+  padding-block: 0.85rem;
+  font-size: 0.9rem;
+}
+
+.spec-table td:first-child {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--slate-400);
+  width: 42%;
+}
+
+.spec-table td:last-child {
+  color: var(--charcoal-950);
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------------
+10. CONCIERGE & FORMULÁRIO DE CONTATO
+   --------------------------------------------------------------------- */
+.contact-layout {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+
+.concierge-card {
+  background-color: var(--surface-white);
+  border: 1px solid var(--border-hairline);
+  padding: clamp(2rem, 4vw, 3.2rem);
+  box-shadow: var(--shadow-subtle);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 1.35rem;
+}
+
+.form-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--slate-600);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  background-color: var(--bg-canvas);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  font-size: 0.94rem;
+  color: var(--charcoal-950);
+  outline: none;
+  transition:
+    border-color 0.35s var(--ease-luxury),
+    background-color 0.35s var(--ease-luxury);
+}
+
+.form-control::placeholder {
+  color: var(--slate-400);
+}
+
+.form-control:focus {
+  border-color: var(--champagne);
+  background-color: var(--surface-white);
+}
+
+textarea.form-control {
+  min-height: 130px;
+  resize: vertical;
+}
+
+/* ---------------------------------------------------------------------
+11. AUTENTICAÇÃO (LOGIN / CADASTRO / RECUPERAÇÃO) & DRAWER DE COMPRA
+   --------------------------------------------------------------------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background-color: rgba(24, 24, 23, 0.42);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.auth-modal {
+  width: 100%;
+  max-width: 460px;
+  background-color: var(--surface-white);
+  border: 1px solid var(--border-hairline);
+  padding: clamp(2rem, 4vw, 3rem);
+  box-shadow: var(--shadow-modal);
+  position: relative;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--border-hairline);
+  margin-bottom: 1.8rem;
+}
+
+.auth-tab {
+  padding-block: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--slate-400);
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s var(--ease-luxury);
+}
+
+.auth-tab.active {
+  color: var(--charcoal-950);
+  border-bottom-color: var(--champagne);
+}
+
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 210;
+  width: 100%;
+  max-width: 440px;
+  background-color: var(--surface-white);
+  border-left: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-modal);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+}
+
+.cart-items {
+  flex: 1;
+  overflow-y: auto;
+  margin-block: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 1rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.cart-item-img {
+  width: 72px;
+  height: 72px;
+  background-color: var(--bg-cream);
+  padding: 0.4rem;
+  object-fit: contain;
+}
+
+.cart-summary {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-medium);
+}
+
+.cart-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1.25rem;
+}
+
+/* ---------------------------------------------------------------------
+12. FOOTER INSTITUCIONAL
+   --------------------------------------------------------------------- */
+.site-footer {
+  width: 100%;
+  background-color: var(--bg-cream);
+  border-top: 1px solid var(--border-hairline);
+  color: var(--slate-600);
+  padding-block: var(--space-lg) var(--space-md);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(3, 1fr);
+  gap: 2.5rem;
+  padding-bottom: var(--space-lg);
+}
+
+.footer-col h5 {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--charcoal-950);
+  margin-bottom: 1.1rem;
+}
+
+.footer-col a {
+  display: block;
+  font-size: 0.88rem;
+  padding-block: 0.35rem;
+  color: var(--slate-600);
+  transition: color 0.3s var(--ease-luxury);
+}
+
+.footer-col a:hover {
+  color: var(--champagne);
+}
+
+.footer-bottom {
+  border-top: 1px solid var(--border-hairline);
+  padding-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--slate-400);
+}
+
+/* ---------------------------------------------------------------------
+13. RESPONSIVIDADE
+   --------------------------------------------------------------------- */
+@media (max-width: 960px) {
+  .feature-split,
+  .watch-detail-grid,
+  .contact-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-split.reverse .feature-media {
+    order: 0;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .nav-links {
+    display: none;
+  }
+
+  .mobile-toggle {
+    display: inline-flex;
+    font-size: 1.4rem;
+    color: var(--charcoal-950);
+  }
+
+  .hero-bg-media img {
+    opacity: 0.12;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+}
